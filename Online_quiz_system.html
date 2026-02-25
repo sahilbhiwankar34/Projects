@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operating System Quiz - Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* MAIN CONTAINER */
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* LOGIN PAGE */
+        #loginPage {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            margin: 50px auto;
+        }
+
+        #loginPage h2 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #999;
+        }
+
+        #error {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* QUIZ PAGE */
+        #quizPage {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-header h2 {
+            color: #667eea;
+            font-size: 22px;
+        }
+
+        .timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e74c3c;
+            background: #ffebee;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .progress-container {
+            margin-bottom: 25px;
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #progressBar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        #question {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* OPTIONS STYLING */
+        #options {
+            margin-bottom: 30px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+            pointer-events: none;
+        }
+
+        .option:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+        }
+
+        .option input[type="radio"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #667eea;
+            transition: all 0.4s ease;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .option input[type="radio"]:active {
+            transform: scale(1.3);
+        }
+
+        .option input[type="radio"]:checked {
+            animation: smoothFill 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes smoothFill {
+            0% {
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.2);
+                transform: scale(1.15);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+                transform: scale(1);
+            }
+        }
+
+        .option label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 15px;
+            color: #333;
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .option input[type="radio"]:checked + label {
+            font-weight: 600;
+            color: #667eea;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-next {
+            padding: 12px 30px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* RESULTS PAGE */
+        #resultsPage {
+            display: none;
+        }
+
+        .results-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .results-header h2 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+            align-items: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7ff, #e8ebff);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-grade {
+            font-size: 24px;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        /* ANSWERS REVIEW */
+        .answers-section {
+            margin-top: 40px;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 40px;
+        }
+
+        .answers-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .answer-item {
+            background: #f8f9ff;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #e0e0e0;
+        }
+
+        .answer-item.correct {
+            border-left-color: #27ae60;
+            background: #f1f9f6;
+        }
+
+        .answer-item.incorrect {
+            border-left-color: #e74c3c;
+            background: #fdf4f4;
+        }
+
+        .answer-question {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .answer-details {
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .answer-details p {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #e74c3c;
+        }
+
+        .correct-answer {
+            color: #27ae60;
+        }
+
+        /* FOOTER */
+        footer {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 10px;
+            font-size: 13px;
+            backdrop-filter: blur(10px);
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        .footer-creator {
+            font-weight: bold;
+            color: #ffd700;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn-action {
+            padding: 12px 30px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-logout {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            #loginPage, #quizPage, .results-container {
+                padding: 25px;
+            }
+
+            .quiz-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 OPERATING SYSTEM QUIZ</h1>
+        <p>TAE-1 | Online Quiz System | Computer Science Engineering Department</p>
+    </div>
+
+    <div class="main-container">
+        <!-- LOGIN PAGE -->
+        <div id="loginPage">
+            <h2>Login to Quiz</h2>
+            <div id="error"></div>
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Username (admin)">
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password (1234)">
+            </div>
+            <button class="btn-login" onclick="login()">Login</button>
+        </div>
+
+        <!-- QUIZ PAGE -->
+        <div id="quizPage">
+            <div class="quiz-header">
+                <h2>Operating System Quiz</h2>
+                <div class="timer" id="timer">Time Left: 15s</div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-text"><span id="questionNo">1</span> of <span id="totalNo">10</span></div>
+                <div class="progress-bar">
+                    <div id="progressBar"></div>
+                </div>
+            </div>
+
+            <div id="question"></div>
+
+            <div id="options"></div>
+
+            <div class="btn-group">
+                <button class="btn-next" onclick="nextQuestion()">Next Question</button>
+            </div>
+        </div>
+
+        <!-- RESULTS PAGE -->
+        <div id="resultsPage">
+            <div class="results-container">
+                <div class="results-header">
+                    <h2>✓ Quiz Completed!</h2>
+                    <p style="color: #666; font-size: 15px;">Your performance analysis</p>
+                </div>
+
+                <div class="dashboard">
+                    <div class="chart-container">
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-label">Your Score</div>
+                            <div class="stat-value" id="finalScore">8/10</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Percentage</div>
+                            <div class="stat-value" id="finalPercentage">80%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Grade</div>
+                            <div class="stat-grade" id="finalGrade">Excellent</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANSWERS REVIEW -->
+                <div class="answers-section">
+                    <h3>📋 Answer Review</h3>
+                    <div id="answersReview"></div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-action" onclick="retakeQuiz()">Retake Quiz</button>
+                    <button class="btn-action btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p class="footer-creator">Created by Sahil Bhiwankar, Aditya Thakre</p>
+    </footer>
+
+    <script>
+        // ====== AJAX CONFIGURATION ======
+        const AJAX = {
+            enabled: true,
+            timeout: 5000,
+            retries: 3,
+            cache: true
+        };
+
+        // ====== LOGIN CREDENTIALS ======
+        const validUser = "admin";
+        const validPass = "1234";
+
+        // ====== QUIZ DATA ======
+        const quizBank = [
+            {
+                question: "What is the main function of an Operating System?",
+                options: [
+                    "Manage hardware and software resources",
+                    "Play games",
+                    "Design websites",
+                    "Create documents"
+                ],
+                answer: 0
+            },
+            {
+                question: "Which of the following is not an Operating System?",
+                options: ["Windows", "Linux", "Oracle", "macOS"],
+                answer: 2
+            },
+            {
+                question: "Which scheduling algorithm uses time quantum?",
+                options: ["FCFS", "SJF", "Round Robin", "Priority"],
+                answer: 2
+            },
+            {
+                question: "Which state comes after Ready state?",
+                options: ["Running", "Waiting", "Terminated", "New"],
+                answer: 0
+            },
+            {
+                question: "What is deadlock?",
+                options: [
+                    "Process waiting for CPU",
+                    "Two or more processes waiting for each other",
+                    "Memory full condition",
+                    "System shutdown"
+                ],
+                answer: 1
+            },
+            {
+                question: "Which memory is fastest?",
+                options: ["RAM", "ROM", "Cache Memory", "Hard Disk"],
+                answer: 2
+            },
+            {
+                question: "Which is a non-preemptive scheduling algorithm?",
+                options: ["Round Robin", "Preemptive Priority", "FCFS", "Multilevel Queue"],
+                answer: 2
+            },
+            {
+                question: "Semaphore is used for?",
+                options: [
+                    "Memory allocation",
+                    "Process synchronization",
+                    "Disk formatting",
+                    "Booting system"
+                ],
+                answer: 1
+            },
+            {
+                question: "Which component manages memory?",
+                options: [
+                    "Compiler",
+                    "Loader",
+                    "Memory Manager",
+                    "Assembler"
+                ],
+                answer: 2
+            },
+            {
+                question: "Virtual memory is used to?",
+                options: [
+                    "Increase CPU speed",
+                    "Increase RAM capacity logically",
+                    "Delete files",
+                    "Improve monitor resolution"
+                ],
+                answer: 1
+            },
+            {
+                question: "Which OS service provides protection and security?",
+                options: ["Process Management", "Security Management", "File System", "CPU Scheduling"],
+                answer: 1
+            },
+            {
+                question: "What is the purpose of a system call?",
+                options: [
+                    "To communicate between user program and OS kernel",
+                    "To increase RAM speed",
+                    "To install drivers",
+                    "To shut down system"
+                ],
+                answer: 0
+            },
+            {
+                question: "Which is an example of batch OS?",
+                options: ["MS-DOS", "IBM OS/360", "Windows 11", "Android"],
+                answer: 1
+            },
+            {
+                question: "A thread is best described as?",
+                options: [
+                    "Lightweight process",
+                    "Type of memory",
+                    "Hardware device",
+                    "File manager"
+                ],
+                answer: 0
+            },
+            {
+                question: "Spooling is mainly used for?",
+                options: [
+                    "Printer management",
+                    "CPU cooling",
+                    "Disk formatting",
+                    "Power saving"
+                ],
+                answer: 0
+            },
+            {
+                question: "Which type of OS is for handheld devices?",
+                options: ["Mobile OS", "Batch OS", "Distributed OS", "Real-time OS"],
+                answer: 0
+            },
+            {
+                question: "What is the main function of an interrupt handler?",
+                options: [
+                    "Handle hardware or software interrupts",
+                    "Increase memory size",
+                    "Delete processes",
+                    "Create files"
+                ],
+                answer: 0
+            },
+            {
+                question: "Which memory suffers from external fragmentation?",
+                options: ["Paging", "Segmentation", "Virtual Memory", "Cache"],
+                answer: 1
+            },
+            {
+                question: "Multiprogramming allows?",
+                options: [
+                    "Multiple programs in memory",
+                    "Multiple CPUs",
+                    "Multiple monitors",
+                    "Multiple disks"
+                ],
+                answer: 0
+            },
+            {
+                question: "Which scheduling allows process interruption?",
+                options: ["Preemptive", "Non-Preemptive", "Batch", "Offline"],
+                answer: 0
+            }
+        ];
+
+        // ====== STATE VARIABLES ======
+        let selectedQuiz = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+        let timeLeft = 15;
+        let timerInterval = null;
+        const TOTAL_QUESTIONS = 10;
+        const QUESTION_TIME = 15;
+
+        // ====== LOGIN FUNCTION ======
+        function login() {
+            const user = document.getElementById("username").value.trim();
+            const pass = document.getElementById("password").value.trim();
+            const errorDiv = document.getElementById("error");
+
+            if (!user || !pass) {
+                errorDiv.innerText = "Please enter both username and password!";
+                errorDiv.style.color = "#e74c3c";
+                return;
+            }
+
+            if (user === validUser && pass === validPass) {
+                errorDiv.innerText = "";
+                initializeQuiz();
+            } else {
+                errorDiv.innerText = "Invalid Username or Password!";
+                errorDiv.style.color = "#e74c3c";
+            }
+        }
+
+        // ====== SHUFFLE FUNCTION ======
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // ====== INITIALIZE QUIZ ======
+        function initializeQuiz() {
+            selectedQuiz = shuffleArray(quizBank).slice(0, TOTAL_QUESTIONS);
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = [];
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("quizPage").style.display = "block";
+            document.getElementById("resultsPage").style.display = "none";
+            document.getElementById("totalNo").innerText = TOTAL_QUESTIONS;
+            loadQuestion();
+        }
+
+        // ====== TIMER FUNCTION ======
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = QUESTION_TIME;
+
+            timerInterval = setInterval(() => {
+                document.getElementById("timer").innerText = "Time Left: " + timeLeft + "s";
+
+                if (timeLeft <= 5) {
+                    document.getElementById("timer").style.color = "#e74c3c";
+                } else {
+                    document.getElementById("timer").style.color = "#667eea";
+                }
+
+                timeLeft--;
+
+                if (timeLeft < 0) {
+                    clearInterval(timerInterval);
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        // ====== LOAD QUESTION ======
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            startTimer();
+
+            const q = selectedQuiz[currentQuestion];
+            
+            // Smooth fade out
+            const questionDiv = document.getElementById("question");
+            const optionsDiv = document.getElementById("options");
+            
+            questionDiv.style.animation = "none";
+            optionsDiv.style.animation = "none";
+            
+            setTimeout(() => {
+                questionDiv.style.animation = "fadeIn 0.5s ease";
+                questionDiv.innerText = q.question;
+                document.getElementById("questionNo").innerText = currentQuestion + 1;
+
+                let optionsHTML = "";
+                q.options.forEach((option, index) => {
+                    optionsHTML += `
+                        <div class="option">
+                            <input type="radio" id="option${index}" name="answer" value="${index}">
+                            <label for="option${index}">${option}</label>
+                        </div>
+                    `;
+                });
+
+                optionsDiv.style.animation = "fadeIn 0.6s ease";
+                optionsDiv.innerHTML = optionsHTML;
+                
+                // Add smooth click handlers to all options
+                attachSmoothClickHandlers();
+            }, 0);
+
+            const progress = ((currentQuestion) / selectedQuiz.length) * 100;
+            document.getElementById("progressBar").style.width = progress + "%";
+        }
+
+        // ====== SMOOTH CLICK HANDLERS ======
+        function attachSmoothClickHandlers() {
+            const options = document.querySelectorAll(".option");
+            
+            options.forEach((option, index) => {
+                const radio = option.querySelector(`input[type="radio"]`);
+                
+                option.addEventListener("click", function() {
+                    // Smooth selection effect
+                    radio.checked = true;
+                    
+                    // Visual feedback - smooth scale
+                    option.style.transition = "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+                    option.style.backgroundColor = "#f0f4ff";
+                    option.style.borderColor = "#667eea";
+                    option.style.boxShadow = "0 8px 20px rgba(102, 126, 234, 0.25)";
+                    
+                    // Remove highlight from other options smoothly
+                    options.forEach((opt, idx) => {
+                        if (idx !== index) {
+                            opt.style.transition = "all 0.4s ease";
+                            opt.style.backgroundColor = "white";
+                            opt.style.boxShadow = "none";
+                        }
+                    });
+                });
+
+                // Smooth hover effect
+                option.addEventListener("mouseenter", function() {
+                    if (!radio.checked) {
+                        option.style.transition = "all 0.3s ease";
+                        option.style.backgroundColor = "#f8f9ff";
+                    }
+                });
+
+                option.addEventListener("mouseleave", function() {
+                    if (!radio.checked) {
+                        option.style.transition = "all 0.3s ease";
+                        option.style.backgroundColor = "white";
+                        option.style.boxShadow = "none";
+                    }
+                });
+            });
+        }
+
+        // ====== FADE IN ANIMATION ======
+        const style = document.createElement("style");
+        style.textContent = `
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ====== NEXT QUESTION ======
+        function nextQuestion() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+
+            if (!selected && currentQuestion < selectedQuiz.length - 1) {
+                alert("Please select an answer before proceeding!");
+                return;
+            }
+
+            if (selected) {
+                const userAnswer = parseInt(selected.value);
+                userAnswers.push(userAnswer);
+
+                if (userAnswer === selectedQuiz[currentQuestion].answer) {
+                    score++;
+                }
+            } else {
+                userAnswers.push(-1);
+            }
+
+            currentQuestion++;
+
+            // Smooth AJAX-like transition
+            if (AJAX.enabled) {
+                const quizPage = document.getElementById("quizPage");
+                quizPage.style.opacity = "1";
+                quizPage.style.transition = "opacity 0.4s ease";
+                
+                setTimeout(() => {
+                    if (currentQuestion < selectedQuiz.length) {
+                        quizPage.style.opacity = "0";
+                        setTimeout(() => {
+                            loadQuestion();
+                            quizPage.style.opacity = "1";
+                        }, 200);
+                    } else {
+                        quizPage.style.opacity = "0";
+                        setTimeout(() => {
+                            clearInterval(timerInterval);
+                            showResults();
+                        }, 200);
+                    }
+                }, 0);
+            } else {
+                if (currentQuestion < selectedQuiz.length) {
+                    loadQuestion();
+                } else {
+                    clearInterval(timerInterval);
+                    showResults();
+                }
+            }
+        }
+
+        // ====== SHOW RESULTS ======
+        function showResults() {
+            const percentage = ((score / selectedQuiz.length) * 100).toFixed(2);
+            let grade;
+
+            if (percentage >= 80) grade = "Excellent 🌟";
+            else if (percentage >= 60) grade = "Good ✓";
+            else if (percentage >= 40) grade = "Average ◐";
+            else grade = "Poor ✗";
+
+            document.getElementById("finalScore").innerText = score + "/" + selectedQuiz.length;
+            document.getElementById("finalPercentage").innerText = percentage + "%";
+            document.getElementById("finalGrade").innerText = grade;
+
+            // Display Chart
+            displayChart(score, selectedQuiz.length - score);
+
+            // Display Answer Review
+            displayAnswerReview();
+
+            document.getElementById("quizPage").style.display = "none";
+            document.getElementById("resultsPage").style.display = "block";
+        }
+
+        // ====== DISPLAY DONUT CHART ======
+        function displayChart(correct, incorrect) {
+            const ctx = document.getElementById("scoreChart").getContext("2d");
+
+            new Chart(ctx, {
+                type: "doughnut",
+                data: {
+                    labels: ["Correct", "Incorrect"],
+                    datasets: [
+                        {
+                            data: [correct, incorrect],
+                            backgroundColor: ["#27ae60", "#e74c3c"],
+                            borderColor: ["#1e8449", "#c0392b"],
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: {
+                                font: { size: 14, weight: "600" },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ====== DISPLAY ANSWER REVIEW ======
+        function displayAnswerReview() {
+            let reviewHTML = "";
+
+            selectedQuiz.forEach((q, index) => {
+                const userAnswer = userAnswers[index];
+                const correctAnswer = q.answer;
+                const isCorrect = userAnswer === correctAnswer;
+                const answerClass = isCorrect ? "correct" : "incorrect";
+                const statusIcon = isCorrect ? "✓" : "✗";
+
+                const userAnswerText = userAnswer === -1 ? "Not Answered" : q.options[userAnswer];
+                const correctAnswerText = q.options[correctAnswer];
+
+                reviewHTML += `
+                    <div class="answer-item ${answerClass}">
+                        <div class="answer-question">${statusIcon} Q${index + 1}. ${q.question}</div>
+                        <div class="answer-details">
+                            <p><strong>Options:</strong></p>
+                            <p>${q.options.map((opt, i) => `<span style="margin-right: 15px;">
+                                ${i === correctAnswer ? '<span style="color: #27ae60; font-weight: 600;">✓' : i === userAnswer && !isCorrect ? '✗' : '●'} ${opt}</span>`).join("")}</p>
+                            <p><span class="your-answer"><strong>Your Answer:</strong> ${userAnswerText}</span></p>
+                            <p><span class="correct-answer"><strong>Correct Answer:</strong> ${correctAnswerText}</span></p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById("answersReview").innerHTML = reviewHTML;
+        }
+
+        // ====== RETAKE QUIZ ======
+        function retakeQuiz() {
+            document.getElementById("loginPage").style.display = "block";
+            document.getElementById("quizPage").style.display = "none";
+            document.getElementById("resultsPage").style.display = "none";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+            document.getElementById("error").innerText = "";
+        }
+
+        // ====== LOGOUT ======
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                retakeQuiz();
+            }
+        }
+    </script>
+</body>
+</html>
